@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>netcoreapp1.1</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="structuremap" Version="4.4.2" />
+        <PackageReference Include="System.Data.SqlClient" Version="4.3.0" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
+        <PackageReference Include="NEvilES" Version="0.1.0-alpha59" />
+        <PackageReference Include="NEvilES.DataStore" Version="0.1.0-alpha59" />
+        <ProjectReference Include="..\TiteAz.Common\TiteAz.Common.csproj" />
+        <ProjectReference Include="..\TiteAz.Domain\TiteAz.Domain.csproj" />
+        <ProjectReference Include="..\TiteAz.ReadModel\TiteAz.ReadModel.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+</Project>
