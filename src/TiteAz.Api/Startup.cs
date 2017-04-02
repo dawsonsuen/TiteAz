@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -32,6 +33,13 @@ namespace TiteAz.Api
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
+
+            services.AddScoped<SqlConnection>(x =>
+            {
+                var sqlConn = new SqlConnection(Configuration.GetConnectionString("TiteAz"));
+                sqlConn.Open();
+                return sqlConn;
             });
         }
 

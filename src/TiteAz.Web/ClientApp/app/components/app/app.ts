@@ -20,13 +20,14 @@ export class App {
             moduleId: '../counter/counter',
             nav: true,
             title: 'Counter'
-        }, {
-            route: 'fetch-data',
-            name: 'fetchdata',
+        },
+        {
+            route: 'user/debts',
+            name: 'fetchdebts',
             settings: { icon: 'th-list' },
-            moduleId: '../fetchdata/fetchdata',
+            moduleId: '../user/debt/fetchdebt',
             nav: true,
-            title: 'Fetch data'
+            title: 'My Debts'
         }]);
 
         this.router = router;

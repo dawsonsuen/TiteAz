@@ -8,16 +8,18 @@ namespace TiteAz.Domain
 
         public class Details
         {
-            public Details(string email, string password, string name)
+            public Details(string email, string password, string firstName, string lastName)
             {
                 Email = email;
                 Password = password;
-                Name = name;
+                FirstName = firstName;
+                LastName = lastName;
             }
 
             public string Email { get; set; }
             public string Password { get; set; }
-            public string Name { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
         }
 
         public class NewUser : ICommand
