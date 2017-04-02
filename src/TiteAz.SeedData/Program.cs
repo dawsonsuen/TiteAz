@@ -84,10 +84,10 @@ namespace TiteAz.SeedData
             {
                 var processor = container.GetInstance<ICommandProcessor>();
 
-                var craig = new User.NewUser { StreamId = CombGuid.NewGuid(), Details = new User.Details("craig@test.com", "xxx", "Craig Gardiner") };
+                var craig = new User.NewUser { StreamId = CombGuid.NewGuid(), Details = new User.Details("craig@test.com", "xxx", "Craig", "Gardiner") };
                 processor.Process(craig);
 
-                var elijah = new User.NewUser { StreamId = CombGuid.NewGuid(), Details = new User.Details("elijah@test.com", "xxx", "Elijah Bates") };
+                var elijah = new User.NewUser { StreamId = CombGuid.NewGuid(), Details = new User.Details("elijah@test.com", "xxx", "Elijah", "Bate") };
                 processor.Process(elijah);
 
                 Bill.Created ourBill = new Bill.Created { StreamId = id, Description = "Sunday arvo fun ;)", Amount = 20.35m };
