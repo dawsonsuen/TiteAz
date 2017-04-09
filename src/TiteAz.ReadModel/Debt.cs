@@ -1,10 +1,11 @@
 using System;
 using NEvilES.Pipeline;
+using TiteAz.Common;
 using TiteAz.Domain;
 
 namespace TiteAz.ReadModel
 {
-    public class Debt
+    public class Debt : IHaveIdentity
     {
         public Guid Id { get; set; }
 
@@ -18,15 +19,24 @@ namespace TiteAz.ReadModel
         public class Projector :
             IProject<Domain.Debt.Created>
         {
-            private readonly object _writer;
-            // public Projector(IWriteData writer)
-            // {
-            //     _writer = writer;
-            // }
+            private readonly IWriteReadModel _writer;
+
+            public Projector(IWriteReadModel writer)
+            {
+                _writer = writer;
+            }
             public void Project(Domain.Debt.Created message, ProjectorData data)
             {
 
-                throw new NotImplementedException();
+                _writer.Insert(new Debt
+                {
+                    Id = message.StreamId,
+                    BillId = message.BillId,
+                    DebitUserId = message.DebitUserId,
+                    CreditUserId = message.CreditUserId,
+                    Amount = message.Amount,
+                    Status = "Created"
+                });
             }
         }
     }
