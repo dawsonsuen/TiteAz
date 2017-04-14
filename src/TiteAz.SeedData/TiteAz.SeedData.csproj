@@ -7,7 +7,7 @@
     <PackageReference Include="Autofac" Version="4.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
-    <PackageReference Include="NEvilES" Version="0.1.0-alpha65" />
+    <PackageReference Include="NEvilES" Version="0.1.0-alpha67" />
     <PackageReference Include="Npgsql" Version="*" />
     <ProjectReference Include="..\TiteAz.Common\TiteAz.Common.csproj" />
     <ProjectReference Include="..\TiteAz.Domain\TiteAz.Domain.csproj" />

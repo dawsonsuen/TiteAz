@@ -24,37 +24,37 @@ namespace TiteAz.SeedData
             SetupConfig();
 
             var dbType = Configuration.GetSection("SeedData").GetSection("DbType").Value;
-            var databaseType = dbType == "pgsql" ? DbType.Postgres : DbType.SqlServer;
+            var databaseType = dbType == "pgsql" ? DatabaseType.Postgres : DatabaseType.SqlServer;
             var connStrName = Configuration.GetSection("SeedData").GetSection("ConnectionString").Value;
 
             Console.WriteLine("Seed data.......");
             var builder = new ContainerBuilder();
 
             builder.RegisterInstance(new CommandContext.User(Guid.NewGuid())).Named<CommandContext.IUser>("user");
-            //builder.RegisterType<ReadModel.SqlReadModel>().AsImplementedInterfaces();
+            builder.RegisterType<ReadModel.SqlReadModel>().AsImplementedInterfaces();
 
-            builder.RegisterType<InMemoryReadModel>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());            
+            //builder.RegisterType<InMemoryReadModel>().AsImplementedInterfaces().SingleInstance();
+            builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());
 
-            builder.RegisterModule(new EventStoreDatabaseModule("Server=(localdb)\\SQL2016;Database=Tite_Az;Integrated Security=true"));
+            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString(connStrName), databaseType));
             builder.RegisterModule(new EventProcessorModule(typeof(User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
             var container = builder.Build();
             container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
 
-            HandleDatabaseDropCreate(databaseType,dbType, connStrName);
+            HandleDatabaseDropCreate(databaseType, dbType, connStrName);
 
-            //SeedData(container);
+            SeedData(container);
 
             using (var scope = container.BeginLifetimeScope())
             {
                 ReplayEvents.Replay(container.Resolve<IFactory>(), scope.Resolve<IAccessDataStore>());
             }
-            var reader = (InMemoryReadModel)container.Resolve<IReadFromReadModel>();
+            var reader = (ReadModel.SqlReadModel)container.Resolve<IReadFromReadModel>();
 
             // var x = reader.Get<ReadModel.User>(Guid.Empty);
 
-            Console.WriteLine("Read Model Document Count {0}", reader.Count());
+           //Console.WriteLine("Read Model Document Count {0}", reader.Count());
             Console.WriteLine("Done - Hit any key!");
             Console.ReadKey();
         }
@@ -81,25 +81,14 @@ namespace TiteAz.SeedData
                 };
                 processor.Process(elijah);
 
-                var ourBill = new Bill.Created {StreamId = id, Description = "Sunday arvo fun ;)", Amount = 20.35m};
+                var ourBill = new Bill.Created { StreamId = id, Description = "Sunday arvo fun ;)", Amount = 20.35m };
                 processor.Process(ourBill);
                 var youOweMe = new Debt.YouOweMe(CombGuid.NewGuid(), craig.StreamId, elijah.StreamId, ourBill.StreamId,
                     10.1725m);
 
                 processor.Process(youOweMe);
-                processor.Process(new Debt.Accept {StreamId = youOweMe.StreamId});
+                processor.Process(new Debt.Accept { StreamId = youOweMe.StreamId });
             }
-        }
-    }
-
-    //TODO: REMOVE
-    public class InMemoryReadModel : IReadFromReadModel, IWriteReadModel
-    {
-        private readonly ConcurrentDictionary<Guid, object> data;
-
-        public InMemoryReadModel()
-        {
-            data = new ConcurrentDictionary<Guid, object>();
         }
 
         public static void SetupConfig()
@@ -113,7 +102,7 @@ namespace TiteAz.SeedData
         }
 
 
-        public static void HandleDatabaseDropCreate(DbType databaseType, string dbType, string connStrName)
+        public static void HandleDatabaseDropCreate(DatabaseType databaseType, string dbType, string connStrName)
         {
             var connStr = new ConnectionString(Configuration.GetConnectionString(connStrName));
             var createSql = string.Empty;
@@ -122,7 +111,7 @@ namespace TiteAz.SeedData
             var drop = Configuration.GetSection("DbTypes").GetSection(dbType).GetSection("drop").Value;
 
 
-            if (databaseType == DbType.Postgres)
+            if (databaseType == DatabaseType.Postgres)
             {
                 conn = new NpgsqlConnection(string.Format("User ID={0};Password={1};Host={2};Port={3};Database=postgres;",
                     connStr.Keys["User ID"], connStr.Keys["Password"], connStr.Keys["Host"], connStr.Keys["Port"]));
@@ -131,7 +120,7 @@ namespace TiteAz.SeedData
 
                 createSql = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "init.pgsql.sql"));
             }
-            else if (databaseType == DbType.SqlServer)
+            else if (databaseType == DatabaseType.SqlServer && dbType != "localdb")
             {
                 conn = new SqlConnection(string.Format(@"Server={0};Database=Master;User Id={1};Password={2};",
                     connStr.Keys["Server"], connStr.Keys["User Id"], connStr.Keys["Password"]));
@@ -150,23 +139,27 @@ namespace TiteAz.SeedData
 
             conn.Open();
 
-
             using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = drop;
-
-                cmd.ExecuteNonQuery();
-
+                try
+                {
+                    cmd.CommandText = drop;
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception ex)
+                {
+                    System.Console.WriteLine(ex.Message);
+                }
                 cmd.CommandText = $"Create database {connStr.Keys["Database"]}";
                 cmd.ExecuteNonQuery();
-                //   t.Commit();
             }
 
             conn.ChangeDatabase(connStr.Keys["Database"]);
 
-            using(var t = conn.BeginTransaction())
+            using (var t = conn.BeginTransaction())
             {
                 var cmd = conn.CreateCommand();
+                cmd.Transaction = t;
                 cmd.CommandText = createSql;
 
                 cmd.ExecuteNonQuery();
@@ -174,4 +167,39 @@ namespace TiteAz.SeedData
             }
         }
     }
+    public class InMemoryReadModel : IReadFromReadModel, IWriteReadModel
+    {
+        private readonly ConcurrentDictionary<Guid, object> data;
+
+        public InMemoryReadModel()
+        {
+            data = new ConcurrentDictionary<Guid, object>();
+        }
+
+        public void Insert<T>(T item) where T : class, IHaveIdentity
+        {
+            data.TryAdd(item.Id, item);
+        }
+
+        public void Update<T>(T item) where T : class, IHaveIdentity
+        {
+            data[item.Id] = item;
+        }
+
+        public T Get<T>(Guid id) where T : IHaveIdentity
+        {
+            return (T)data[id];
+        }
+
+        public void Clear()
+        {
+            data.Clear();
+        }
+
+        public int Count()
+        {
+            return data.Count;
+        }
+    }
+
 }

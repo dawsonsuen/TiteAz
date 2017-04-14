@@ -4,14 +4,14 @@ using Autofac;
 using NEvilES.DataStore;
 using Npgsql;
 
-namespace TiteAz.SeedData
+namespace TiteAz.Common
 {
     public class EventStoreDatabaseModule : Module
     {
         private string ConnectionString { get; }
-        private DbType dbType { get; set; }
+        private DatabaseType dbType { get; set; }
 
-        public EventStoreDatabaseModule(string connectionString, DbType dbType)
+        public EventStoreDatabaseModule(string connectionString, DatabaseType dbType)
         {
             ConnectionString = connectionString;
             this.dbType = dbType;
@@ -21,9 +21,9 @@ namespace TiteAz.SeedData
         {
             builder.Register(c => new ConnectionString(ConnectionString))
                 .As<IConnectionString>().SingleInstance();
-          
 
-            if (dbType == DbType.Postgres)
+
+            if (dbType == DatabaseType.Postgres)
             {
                 builder.Register(c =>
                 {
@@ -32,14 +32,14 @@ namespace TiteAz.SeedData
                     return conn;
                 }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();
             }
-            else if (dbType == DbType.SqlServer)
+            else if (dbType == DatabaseType.SqlServer)
             {
                 builder.Register(c =>
                 {
                     var conn = new SqlConnection(c.Resolve<IConnectionString>().Data);
                     conn.Open();
                     return conn;
-                }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();               
+                }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();
             }
             else
             {
@@ -60,7 +60,7 @@ namespace TiteAz.SeedData
 
     }
 
-    public enum DbType
+    public enum DatabaseType
     {
         SqlServer,
         Postgres

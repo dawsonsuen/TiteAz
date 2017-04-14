@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using NEvilES.Pipeline;
 using Newtonsoft.Json.Serialization;
 using TiteAz.Common;
-using TiteAz.SeedData;
 using Autofac.Extensions.DependencyInjection;
 using TiteAz.Domain;
 using System.Reflection;
@@ -51,7 +50,7 @@ namespace TiteAz.Api
                 return sqlConn;
             });
 
-            services.AddScoped<IWriteReadModel, WriteReadModel>();
+            services.AddScoped<IWriteReadModel, SqlReadModel>();
             services.AddScoped<IReadFromReadModel, SqlReadModel>();
 
             var builder = new ContainerBuilder();
@@ -65,7 +64,7 @@ namespace TiteAz.Api
                 return new CommandContext.User(uid);
             }).Named<CommandContext.IUser>("user");
 
-            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("TiteAz1")));
+           // builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("TiteAz1")));
             builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
             builder.Populate(services);
 
