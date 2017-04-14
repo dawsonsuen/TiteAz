@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using Autofac;
-using TiteAz.Common;
+using NEvilES.DataStore;
 
 namespace TiteAz.SeedData
 {
@@ -16,12 +16,12 @@ namespace TiteAz.SeedData
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.Register(c => new SqlConnectionString(ConnectionString))
+            builder.Register(c => new ConnectionString(ConnectionString))
                 .As<IConnectionString>().SingleInstance();
 
             builder.Register(c =>
             {
-                var conn = new SqlConnection(c.Resolve<IConnectionString>().ConnectionString);
+                var conn = new SqlConnection(c.Resolve<IConnectionString>().Data);
                 conn.Open();
                 return conn;
             }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();
@@ -68,7 +68,7 @@ EXEC ('CREATE DATABASE [{0}] ON PRIMARY
                 command.ExecuteNonQuery();
             }
 
-            using (var connection = new SqlConnection(connString.ConnectionString))
+            using (var connection = new SqlConnection(connString.Data))
             {
                 connection.Open();
                 var command = connection.CreateCommand();

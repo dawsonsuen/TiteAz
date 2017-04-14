@@ -52,7 +52,7 @@ namespace TiteAz.Api
             });
 
             services.AddScoped<IWriteReadModel, WriteReadModel>();
-            services.AddScoped<IReadData, ReadData>();
+            services.AddScoped<IReadFromReadModel, ReadModelReader>();
 
             var builder = new ContainerBuilder();
 

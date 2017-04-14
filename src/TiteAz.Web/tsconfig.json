@@ -1,14 +1,23 @@
 {
   "compilerOptions": {
+    "target": "es6",
     "moduleResolution": "node",
-    "target": "es5",
-    "sourceMap": true,
+    "isolatedModules": false,
+    "jsx": "react",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipDefaultLibCheck": true,
-    "lib": [ "es6", "dom" ],
-    "types": [ "node" ]
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "allowSyntheticDefaultImports": true,    
+    "outDir": "build",
+    "baseUrl": "./src"
   },
-  "exclude": [ "bin", "node_modules" ],
-  "atom": { "rewriteTsconfig": false }
+  "compileOnSave": false,
+  "exclude": [
+    "node_modules"
+  ]
 }
