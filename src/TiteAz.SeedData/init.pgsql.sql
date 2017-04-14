@@ -2,12 +2,12 @@ CREATE TABLE events
 (
     id bigserial NOT NULL PRIMARY KEY,
     category varchar(500) NOT NULL,
-    streamid char(36) NOT NULL,
-    transactionid char(36) NOT NULL,
+    streamid uuid NOT NULL,
+    transactionid uuid NOT NULL,
     metadata text NOT NULL,
     bodytype varchar(500) NOT NULL,
     body text NOT NULL,
-    who char(36) NOT NULL,
+    who uuid NOT NULL,
     _when timestamp NOT NULL,
     version int NOT NULL,
     appversion varchar(20) NOT NULL
