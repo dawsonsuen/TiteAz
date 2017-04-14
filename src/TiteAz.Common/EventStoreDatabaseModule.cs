@@ -24,12 +24,15 @@ namespace TiteAz.SeedData
                 var conn = new SqlConnection(c.Resolve<IConnectionString>().ConnectionString);
                 conn.Open();
                 return conn;
-            }).As<IDbConnection>().InstancePerLifetimeScope();
+            }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();
+
+
+
             builder.Register(c =>
-            {
-                var conn = c.Resolve<IDbConnection>();
-                return conn.BeginTransaction();
-            }).As<IDbTransaction>().InstancePerLifetimeScope();
+          {
+              var conn = c.Resolve<IDbConnection>();
+              return conn.BeginTransaction();
+          }).As<IDbTransaction>().InstancePerLifetimeScope();
         }
 
         public static void TestLocalDbExists(IConnectionString connString)
@@ -52,11 +55,11 @@ DECLARE @FILENAME AS VARCHAR(255)
 
 SET @FILENAME = CONVERT(VARCHAR(255), SERVERPROPERTY('instancedefaultdatapath')) + '{0}';
 
-EXEC ('CREATE DATABASE [{0}] ON PRIMARY 
-	(NAME = [{0}], 
-	FILENAME =''' + @FILENAME + ''', 
-	SIZE = 25MB, 
-	MAXSIZE = 50MB, 
+EXEC ('CREATE DATABASE [{0}] ON PRIMARY
+	(NAME = [{0}],
+	FILENAME =''' + @FILENAME + ''',
+	SIZE = 25MB,
+	MAXSIZE = 50MB,
 	FILEGROWTH = 5MB )')
 ", connString.Keys["Database"]);
 
@@ -88,6 +91,41 @@ PRIMARY KEY CLUSTERED
        [id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE TABLE users (
+    id UNIQUEIDENTIFIER PRIMARY key,
+    email nvarchar(255) not null,
+    first_name nvarchar(255) not null,
+    last_name nvarchar(255) not null,
+	created datetime not null
+);
+
+CREATE TABLE debts (
+    id UNIQUEIDENTIFIER PRIMARY key,
+    bill_id UNIQUEIDENTIFIER,
+    debit_user_id UNIQUEIDENTIFIER not null,
+    credit_user_id UNIQUEIDENTIFIER not null,
+    amount DECIMAL(12,0) not null,
+    debt_status nvarchar(100) not null
+);
+
+
+CREATE TABLE bills (
+    id UNIQUEIDENTIFIER PRIMARY key,
+    [description] nvarchar(500) not null,
+    created_date DATETIME not null
+)
+
+CREATE TABLE read_model (
+    id UNIQUEIDENTIFIER PRIMARY key,
+    model_type text not null,
+    body text not null,
+    last_updated datetime not null
+);
+
+
+
+
 ";
                 command.ExecuteNonQuery();
             }

@@ -27,8 +27,8 @@ namespace TiteAz.Common
 
             //builder.RegisterSource(new ContravariantRegistrationSource());
 
-            //builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProject<>));
-            //builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProjectWithResult<>));
+            builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProject<>));
+            builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProjectWithResult<>));
             //builder.RegisterType<DataAccess>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
             var eventStore = new[]

@@ -7,7 +7,7 @@ export class App {
     configureRouter(config: RouterConfiguration, router: Router) {
         config.title = 'Aurelia';
         config.map([{
-            route: [ '', 'home' ],
+            route: ['', 'home'],
             name: 'home',
             settings: { icon: 'home' },
             moduleId: '../home/home',
@@ -28,6 +28,14 @@ export class App {
             moduleId: '../user/debt/fetchdebt',
             nav: true,
             title: 'My Debts'
+        },
+        {
+            route: 'user/logon',
+            name: 'logonUser',
+            settings: { icon: 'th-list' },
+            moduleId: '../user/logon/logonPage',
+            nav: true,
+            title: 'Logon'
         }]);
 
         this.router = router;

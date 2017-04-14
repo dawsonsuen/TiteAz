@@ -5,6 +5,7 @@ using NEvilES.Pipeline;
 using TiteAz.Domain;
 using Autofac;
 using TiteAz.Common;
+using ReadModel = TiteAz.ReadModel;
 
 namespace TiteAz.SeedData
 {
@@ -14,14 +15,17 @@ namespace TiteAz.SeedData
         {
             Console.WriteLine("GTD seed data.......");
             var builder = new ContainerBuilder();
+
+            builder.RegisterType<ReadModel.WriteReadModel>().As<IWriteReadModel>();
+            builder.RegisterType<ReadModel.ReadData>().As<IReadData>();
             builder.RegisterInstance(new CommandContext.User(Guid.NewGuid())).Named<CommandContext.IUser>("user");
 
             builder.RegisterModule(new EventStoreDatabaseModule("Server=(localdb)\\SQL2016;Database=Tite_Az;Integrated Security=true"));
-            builder.RegisterModule(new EventProcessorModule(typeof(User).GetTypeInfo().Assembly,null));
+            builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
             var container = builder.Build();
 
-            EventStoreDatabaseModule.TestLocalDbExists(container.Resolve<IConnectionString>());
+            //EventStoreDatabaseModule.TestLocalDbExists(container.Resolve<IConnectionString>());
 
             container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
 
