@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
+using NEvilES.Pipeline;
 using TiteAz.Common;
 using TiteAz.ReadModel;
 
@@ -11,9 +12,9 @@ namespace TiteAz.Api.Controllers
     [Route("api/[controller]")]
     public class UserController : Controller
     {
-        private readonly SqlConnection _sqlConn;
-        public readonly IReadData _reader;
-        public UserController(SqlConnection sqlConn, IReadData reader)
+        private readonly IDbConnection _sqlConn;
+        public readonly IReadFromReadModel _reader;
+        public UserController(IDbConnection sqlConn, IReadFromReadModel reader)
         {
             _reader = reader;
             _sqlConn = sqlConn;
@@ -52,14 +53,14 @@ namespace TiteAz.Api.Controllers
         {
             Guid userId = Guid.Empty;
 
-            var cmd = _sqlConn.CreateCommand();
-            cmd.CommandText = "select id from users where :email";
-            cmd.Parameters.AddWithValue(":email", email);
-            using (var r = cmd.ExecuteReader())
-            {
-                r.Read();
-                userId = r.GetGuid(0);
-            }
+          //  var cmd = _sqlConn.CreateCommand();
+        //    // cmd.CommandText = "select id from users where :email";
+        //    //cmd.Parameters.AddWithValue(":email", email);
+        //     using (var r = cmd.ExecuteReader())
+        //     {
+        //         r.Read();
+        //         userId = r.GetGuid(0);
+        //     }
 
 
             var user = _reader.Get<User>(userId);

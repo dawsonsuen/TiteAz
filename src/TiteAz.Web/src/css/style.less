@@ -1,0 +1,40 @@
+@import './bootstrap/mixins';
+@import './variables';
+@import './fontawesome/font-awesome.less';
+
+html, body, h1, h2, h3, h4 {
+    font-family: "Open Sans",sans-serif;
+}
+
+html, body {
+    overflow: hidden;
+    min-height: 100%;
+    height: 100%;
+
+}
+
+.navbar-fixed-top {
+    margin-bottom: 0;
+    /*background: #23b7e5;*/
+}
+
+.full-height{
+    height: 100%;
+}
+
+section#main {
+  margin-top: 51px;
+  margin-left: 70px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.inner-wrapper {
+    height: 100%;
+    & > .pad{
+        padding: 15px;
+    }
+}

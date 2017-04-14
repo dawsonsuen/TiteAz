@@ -1,45 +1,71 @@
-var isDevBuild = process.argv.indexOf('--env.prod') < 0;
-var path = require('path');
-var webpack = require('webpack');
-var AureliaWebpackPlugin = require('aurelia-webpack-plugin');
+﻿var webpack = require("webpack");
+const path = require("path");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const package = require("./package.json");
+const prod = process.argv.indexOf('--prod') !== -1;
 
-var bundleOutputDir = './wwwroot/dist';
 module.exports = {
-    resolve: { extensions: [ '.js', '.ts' ] },
-    entry: { 'app': 'aurelia-bootstrapper-webpack' }, // Note: The aurelia-webpack-plugin will add your app's modules to this bundle automatically
+    resolve: {
+        modules: ['src', 'node_modules'],
+        // Add '.ts' and '.tsx' as resolvable extensions.
+        extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".less"]
+    },
+    entry: {
+        main: "./src/main.tsx",
+        vendor: Object.keys(package.dependencies)
+    },
     output: {
-        path: path.resolve(bundleOutputDir),
-        publicPath: '/dist',
-        filename: '[name].js'
+        path: path.resolve(__dirname, "build"),
+        publicPath: "/",
+        filename: "[name].bundle.js"
     },
     module: {
-        loaders: [
-            { test: /\.ts$/, include: /ClientApp/, loader: 'ts-loader', query: { silent: true } },
-            { test: /\.html$/, loader: 'html-loader' },
-            { test: /\.css$/, loaders: [ 'style-loader', 'css-loader' ] },
-            { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader?limit=100000' },
-            { test: /\.json$/, loader: 'json-loader' }
+        rules: [{
+                test: /\.css$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: 'css-loader'
+                }),
+            },
+            {
+                test: /\.less$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader', 'less-loader']
+                }),
+            },
+            {
+                test: /\.woff($|\?)|\.woff2($|\?)|\.ttf($|\?)|\.eot($|\?)|\.svg($|\?)/,
+                loader: 'url-loader'
+            },
+            {
+                test: /\.ts(x?)$/,
+                use: ['react-hot-loader', 'babel-loader?presets[]=react,presets[]=es2015,presets[]=stage-0', 'ts-loader'],
+                exclude: /node_modules/
+            },
         ]
     },
     plugins: [
-        new webpack.DefinePlugin({ IS_DEV_BUILD: JSON.stringify(isDevBuild) }),
-        new webpack.DllReferencePlugin({
-            context: __dirname,
-            manifest: require('./wwwroot/dist/vendor-manifest.json')
+        new HtmlWebpackPlugin({
+            title: 'cerebralts-base',
+            template: path.resolve(__dirname, "./src/index.html"),
+            inject: 'body'
         }),
-        new AureliaWebpackPlugin({
-            root: path.resolve('./'),
-            src: path.resolve('./ClientApp'),
-            baseUrl: '/'
-        })
-    ].concat(isDevBuild ? [
-        // Plugins that apply in development builds only
-        new webpack.SourceMapDevToolPlugin({
-            filename: '[file].map', // Remove this line if you prefer inline source maps
-            moduleFilenameTemplate: path.relative(bundleOutputDir, '[resourcePath]') // Point sourcemap entries to the original file locations on disk
-        })
-    ] : [
-        // Plugins that apply in production builds only
-        new webpack.optimize.UglifyJsPlugin()
-    ])
+        new ExtractTextPlugin({
+            filename: 'styles.css'
+        }),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "vendor",
+            filename: "vendor.bundle.js"
+        }),
+    ],
+     devServer: {
+        proxy: {
+        '/api': {
+            target: 'http://localhost:5050',
+            secure: false
+        }
+    }
+  }
 };

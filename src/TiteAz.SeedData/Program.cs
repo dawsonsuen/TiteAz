@@ -17,7 +17,7 @@ namespace TiteAz.SeedData
             var builder = new ContainerBuilder();
 
             builder.RegisterType<ReadModel.WriteReadModel>().As<IWriteReadModel>();
-            builder.RegisterType<ReadModel.ReadData>().As<IReadData>();
+            builder.RegisterType<ReadModel.ReadModelReader>().As<IReadFromReadModel>();
             builder.RegisterInstance(new CommandContext.User(Guid.NewGuid())).Named<CommandContext.IUser>("user");
 
             builder.RegisterModule(new EventStoreDatabaseModule("Server=(localdb)\\SQL2016;Database=Tite_Az;Integrated Security=true"));
