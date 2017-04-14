@@ -6,14 +6,28 @@ using NEvilES.Pipeline;
 using TiteAz.Domain;
 using Autofac;
 using TiteAz.Common;
+using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Data;
+using NEvilES.DataStore;
+using Npgsql;
+using System.Data.SqlClient;
 
 namespace TiteAz.SeedData
 {
     public static class Program
     {
+        public static IConfigurationRoot Configuration { get; set; }
+
         public static void Main(string[] args)
         {
-            Console.WriteLine("GTD seed data.......");
+            SetupConfig();
+
+            var dbType = Configuration.GetSection("SeedData").GetSection("DbType").Value;
+            var databaseType = dbType == "pgsql" ? DbType.Postgres : DbType.SqlServer;
+            var connStrName = Configuration.GetSection("SeedData").GetSection("ConnectionString").Value;
+
+            Console.WriteLine("Seed data.......");
             var builder = new ContainerBuilder();
 
             builder.RegisterInstance(new CommandContext.User(Guid.NewGuid())).Named<CommandContext.IUser>("user");
@@ -28,7 +42,7 @@ namespace TiteAz.SeedData
             var container = builder.Build();
             container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
 
-            //EventStoreDatabaseModule.TestLocalDbExists(container.Resolve<IConnectionString>());
+            HandleDatabaseDropCreate(databaseType,dbType, connStrName);
 
             //SeedData(container);
 
@@ -88,29 +102,76 @@ namespace TiteAz.SeedData
             data = new ConcurrentDictionary<Guid, object>();
         }
 
-        public void Insert<T>(T item) where T : class, IHaveIdentity
+        public static void SetupConfig()
         {
-            data.TryAdd(item.Id, item);
+            var builder = new ConfigurationBuilder()
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+               .AddJsonFile($"appsettings.Development.json", optional: true, reloadOnChange: false);
+
+            Configuration = builder.Build();
         }
 
-        public void Update<T>(T item) where T : class, IHaveIdentity
-        {
-            data[item.Id] = item;
-        }
 
-        public T Get<T>(Guid id) where T : IHaveIdentity
+        public static void HandleDatabaseDropCreate(DbType databaseType, string dbType, string connStrName)
         {
-            return (T)data[id];
-        }
+            var connStr = new ConnectionString(Configuration.GetConnectionString(connStrName));
+            var createSql = string.Empty;
 
-        public void Clear()
-        {
-            data.Clear();
-        }
+            IDbConnection conn;
+            var drop = Configuration.GetSection("DbTypes").GetSection(dbType).GetSection("drop").Value;
 
-        public int Count()
-        {
-            return data.Count;
+
+            if (databaseType == DbType.Postgres)
+            {
+                conn = new NpgsqlConnection(string.Format("User ID={0};Password={1};Host={2};Port={3};Database=postgres;",
+                    connStr.Keys["User ID"], connStr.Keys["Password"], connStr.Keys["Host"], connStr.Keys["Port"]));
+
+                drop = string.Format(drop, connStr.Keys["Database"]);
+
+                createSql = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "init.pgsql.sql"));
+            }
+            else if (databaseType == DbType.SqlServer)
+            {
+                conn = new SqlConnection(string.Format(@"Server={0};Database=Master;User Id={1};Password={2};",
+                    connStr.Keys["Server"], connStr.Keys["User Id"], connStr.Keys["Password"]));
+
+                drop = string.Format(drop, connStr.Keys["Database"]);
+                createSql = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "init.mssql.sql"));
+            }
+            else
+            {
+                conn = new SqlConnection(string.Format(@"Server={0};Database=Master;Integrated Security=true;",
+                   connStr.Keys["Server"]));
+
+                drop = string.Format(drop, connStr.Keys["Database"]);
+                createSql = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "init.mssql.sql"));
+            }
+
+            conn.Open();
+
+
+            using (var cmd = conn.CreateCommand())
+            {
+                cmd.CommandText = drop;
+
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = $"Create database {connStr.Keys["Database"]}";
+                cmd.ExecuteNonQuery();
+                //   t.Commit();
+            }
+
+            conn.ChangeDatabase(connStr.Keys["Database"]);
+
+            using(var t = conn.BeginTransaction())
+            {
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = createSql;
+
+                cmd.ExecuteNonQuery();
+                t.Commit();
+            }
         }
     }
 }

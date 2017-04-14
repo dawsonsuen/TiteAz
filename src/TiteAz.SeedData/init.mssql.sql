@@ -1,9 +1,3 @@
-CREATE DATABASE TiteAZ;
-GO
-
-USE TiteAz
-GO
-
 CREATE TABLE [dbo].[events]
 (
     [id] [bigint] IDENTITY(1,1) NOT NULL,
@@ -18,5 +12,15 @@ CREATE TABLE [dbo].[events]
     [version] [int] NOT NULL,
     [appversion] [nvarchar](20) NOT NULL
 )
+
+GO
+
+create table read_model (
+    id bigserial primary key,
+    stream_id uuid not null,
+    type varchar(500) not null,
+    body text not null,
+    last_update timestamp not null
+);
 
 GO

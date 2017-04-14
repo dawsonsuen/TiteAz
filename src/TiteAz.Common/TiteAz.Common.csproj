@@ -9,5 +9,6 @@
     <PackageReference Include="NEvilES" Version="0.1.0-alpha67" />
     <PackageReference Include="NEvilES.DataStore" Version="0.1.0-alpha675" />
     <PackageReference Include="System.Data.SqlClient" Version="4.3.0" />
+    <PackageReference Include="Npgsql" Version="*" />
   </ItemGroup>
 </Project>
