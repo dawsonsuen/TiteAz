@@ -25,18 +25,18 @@ namespace TiteAz.Common
             //builder.RegisterAssemblyTypes(domain).AsClosedTypesOf(typeof(IHandleAggregateCommandMarker<>));
             //builder.RegisterAssemblyTypes(domain).AsClosedTypesOf(typeof(INeedExternalValidation<>));
 
-            ////builder.RegisterSource(new ContravariantRegistrationSource());
+            //builder.RegisterSource(new ContravariantRegistrationSource());
 
             //builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProject<>));
             //builder.RegisterAssemblyTypes(readModel).AsClosedTypesOf(typeof(IProjectWithResult<>));
-            ////builder.RegisterType<DataAccess>().AsImplementedInterfaces().InstancePerLifetimeScope();
+            //builder.RegisterType<DataAccess>().AsImplementedInterfaces().InstancePerLifetimeScope();
 
-            ////var eventStore = new[]
-            ////{
-            ////    typeof(DatabaseEventStore).GetTypeInfo().Assembly,
-            ////    typeof(PipelineProcessor).GetTypeInfo().Assembly,
-            ////};
-            ////builder.RegisterAssemblyTypes(eventStore).AsImplementedInterfaces().InstancePerLifetimeScope();
+            //var eventStore = new[]
+            //{
+            //    typeof(DatabaseEventStore).GetTypeInfo().Assembly,
+            //    typeof(PipelineProcessor).GetTypeInfo().Assembly,
+            //};
+            //builder.RegisterAssemblyTypes(eventStore).AsImplementedInterfaces().InstancePerLifetimeScope();
 
             //builder.RegisterType<DatabaseEventStore>().As<IRepository>().InstancePerLifetimeScope();
             //builder.RegisterType<Factory>().As<IFactory>().InstancePerLifetimeScope();
