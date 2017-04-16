@@ -14,8 +14,12 @@ declare var process: any;
 
 const appState: StateModel = {
     views:{
-        selected: Views.Index,
+        selected: Views.Dashboard,
         viewInfo:{}
+    },
+    login: { 
+        username: "",
+        password: ""
     }
 };
 

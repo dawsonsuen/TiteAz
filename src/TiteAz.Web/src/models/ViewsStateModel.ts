@@ -1,6 +1,6 @@
 export enum Views {
-    Index = <any>"index",
-    Home = <any>"home"
+    Dashboard = <any>"dashboard",
+    Login = <any>"login"
 }
 
 export interface PageInfo {
