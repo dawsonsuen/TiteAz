@@ -5,7 +5,8 @@ import { Views } from 'models/ViewsStateModel'
 import PropSignals from 'models/Signals'
 import { ViewPort, View } from './ViewPort';
 import Nav from "./nav";
-import IndexPage from "components/Index/IndexPage";
+import DashboardView from "components/DashboardView";
+import LoginView from "components/LoginView";
 
 
 interface Props extends PropSignals {
@@ -22,8 +23,11 @@ export default connect<Props>({
             <section id="main">
                 <div className="inner-wrapper">
                     <ViewPort view={props.currentView}>
-                        <View match={Views.Index}>
-                            <IndexPage />
+                        <View match={Views.Dashboard}>
+                            <DashboardView />
+                        </View>
+                        <View match={Views.Login}>
+                            <LoginView />
                         </View>
                     </ViewPort>
                 </div>

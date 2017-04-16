@@ -7,7 +7,7 @@ export interface ViewsSignals {
 
 export default (module, controller) => {
     const initialState: ViewsStateModel = {
-        selected: Views.Index,
+        selected: Views.Dashboard,
         viewInfo: {}
     };
 

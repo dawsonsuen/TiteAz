@@ -64,7 +64,7 @@ namespace TiteAz.Api
                 return new CommandContext.User(uid);
             }).Named<CommandContext.IUser>("user");
 
-           // builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("TiteAz1")));
+            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("TiteAz1"),DatabaseType.SqlServer));
             builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
             builder.Populate(services);
 
