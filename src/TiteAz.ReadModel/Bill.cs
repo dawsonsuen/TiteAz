@@ -9,6 +9,7 @@ namespace TiteAz.ReadModel
     {
 
         public Guid Id { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
 
         public decimal Amount { get; set; }
@@ -28,6 +29,7 @@ namespace TiteAz.ReadModel
                 _writer.Insert(new Bill
                 {
                     Id = message.StreamId,
+                    Name = message.Name,
                     Description = message.Description,
                     Amount = message.Amount
                 });

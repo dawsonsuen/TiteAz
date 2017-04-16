@@ -27,13 +27,11 @@ namespace TiteAz.SeedData
                 return conn;
             }).AsSelf().As<IDbConnection>().InstancePerLifetimeScope();
 
-
-
             builder.Register(c =>
-          {
-              var conn = c.Resolve<IDbConnection>();
-              return conn.BeginTransaction();
-          }).As<IDbTransaction>().InstancePerLifetimeScope();
+            {
+                var conn = c.Resolve<IDbConnection>();
+                return conn.BeginTransaction();
+            }).As<IDbTransaction>().InstancePerLifetimeScope();
         }
 
 

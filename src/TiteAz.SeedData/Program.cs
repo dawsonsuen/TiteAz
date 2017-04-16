@@ -32,10 +32,7 @@ namespace TiteAz.SeedData
 
             builder.RegisterInstance(new CommandContext.User(Guid.NewGuid())).Named<CommandContext.IUser>("user");
             builder.RegisterType<ReadModel.SqlReadModel>().AsImplementedInterfaces();
-
-            //builder.RegisterType<InMemoryReadModel>().AsImplementedInterfaces().SingleInstance();
             builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());
-
             builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString(connStrName), databaseType));
             builder.RegisterModule(new EventProcessorModule(typeof(User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
@@ -100,7 +97,6 @@ namespace TiteAz.SeedData
 
             Configuration = builder.Build();
         }
-
 
         public static void HandleDatabaseDropCreate(DatabaseType databaseType, string dbType, string connStrName)
         {

@@ -14,6 +14,7 @@ using Autofac.Extensions.DependencyInjection;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using TiteAz.ReadModel;
+using NEvilES;
 
 namespace TiteAz.Api
 {
@@ -39,6 +40,7 @@ namespace TiteAz.Api
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
+            services.AddSingleton<IHttpContextAccessor,HttpContextAccessor>();
 
             var builder = new ContainerBuilder();
 
@@ -51,6 +53,8 @@ namespace TiteAz.Api
                 return new CommandContext.User(uid);
             }).Named<CommandContext.IUser>("user");
 
+
+            builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());
             builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("pgsql"), DatabaseType.Postgres));
             builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
@@ -58,9 +62,11 @@ namespace TiteAz.Api
             services.AddScoped<IReadFromReadModel, SqlReadModel>();
             builder.Populate(services);
 
+            var container = builder.Build();
+            container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
 
             // Create the IServiceProvider based on the container.
-            return new AutofacServiceProvider(builder.Build());
+            return new AutofacServiceProvider(container);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
