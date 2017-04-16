@@ -8,7 +8,7 @@ interface Props extends PropSignals {
 }
 
 export default connect<Props>({
-    name : getPath(x => x.login.loggedInUser)
+    name : getPath(x => x.login.loggedInUser.firstName)
 }, function DashboardView(props) {
 
     return (<div>

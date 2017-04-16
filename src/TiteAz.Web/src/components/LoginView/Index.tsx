@@ -15,7 +15,7 @@ export default connect<Props>({
     const onChange = (field: string, value: string) => {
         props.signals.common.fieldChanged({
             field: field,
-            value: value        
+            value: value
         })
     }
 
@@ -29,20 +29,23 @@ export default connect<Props>({
 
     let login = () => {
         props.signals.common.login({});
-    }  
+    }
 
-    return (<div>
-            <div>Login </div>
+    return (
+        <div>
+        <div>Login </div>
 
-            <div>
-                <label htmlFor="username"> Username  </label> &nbsp;                
-                <input id="username" name="username" type="text" value={props.username} onChange={onUsernameChange} />
-                <br />
-                <label htmlFor="password"> Password </label> &nbsp;
-                <input id="password" name="password" type="password" value={props.password} onChange={onPasswordChange} />
-                <br />
-                <button onClick={login}> Login </button>
+        <div>
+            <div className="input-group">
+                <span className="input-group-addon">Username</span>                
+            <input className="form-control" name="username" type="text" value={props.username} onChange={onUsernameChange} />
+            </div>
+                <div className="input-group">
+            <span className="input-group-addon">Password</span>                
+            <input className="form-control" name="password" type="password" value={props.password} onChange={onPasswordChange} />
             </div>   
-        </div>    
+              <button className="btn btn-default" onClick={login}> Login </button>
+          </div>     
+          </div>     
     );
 });
