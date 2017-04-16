@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using NEvilES;
 using NEvilES.Pipeline;
@@ -21,8 +22,14 @@ namespace TiteAz.Api.Controllers
             _commandProcessor = commandProccessor;
         }
 
+        // [HttpGet("")]
+        // public IEnumerable<ReadModel.Bill> GetBills()
+        // {
 
-        [HttpPostAttribute("bill")]
+        // }
+
+
+        [HttpPost("bill")]
         public Guid Bill([FromBody] BillInputModel input)
         {
             var created = new Domain.Bill.Create(CombGuid.NewGuid(), input.Name, input.Description, input.Total);
@@ -34,7 +41,7 @@ namespace TiteAz.Api.Controllers
 
 
         [HttpPost("bill/comment")]
-        public Guid AddComment([FromQueryAttribute] Guid BillId, [FromBody] CommentInputModel input)
+        public Guid AddComment([FromQueryAttribute] Guid BillId, [FromBody] NewCommentInputModel input)
         {
 
             var commentAdded = new Domain.Bill.AddComment(BillId, CombGuid.NewGuid(), input.Comment);
@@ -43,10 +50,38 @@ namespace TiteAz.Api.Controllers
 
             return commentAdded.CommentId;
         }
+
+        [HttpPatchAttribute("bill/comment")]
+        public Guid EditComment([FromQueryAttribute] Guid BillId, [FromBody] EditCommentInputModel input)
+        {
+
+            var commentAdded = new Domain.Bill.EditComment(BillId, input.CommentId, input.Comment);
+
+            _commandProcessor.Process(commentAdded);
+
+            return commentAdded.CommentId;
+        }
+
+        [HttpDeleteAttribute("bill/comment")]
+        public Guid RemoveComment([FromQueryAttribute] Guid BillId, [FromBody] Guid commentId)
+        {
+
+            var commentAdded = new Domain.Bill.RemoveComment(BillId, commentId);
+
+            _commandProcessor.Process(commentAdded);
+
+            return commentAdded.CommentId;
+        }
     }
 
-    public class CommentInputModel
+    public class NewCommentInputModel
     {
+        public string Comment { get; set; }
+    }
+
+    public class EditCommentInputModel
+    {
+        public Guid CommentId { get; set; }
         public string Comment { get; set; }
     }
 }

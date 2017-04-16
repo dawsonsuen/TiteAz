@@ -8,7 +8,6 @@ namespace TiteAz.ReadModel
     public class Debt : IHaveIdentity
     {
         public Guid Id { get; set; }
-
         public Guid BillId { get; set; }
         public Guid DebitUserId { get; set; }
         public Guid CreditUserId { get; set; }
