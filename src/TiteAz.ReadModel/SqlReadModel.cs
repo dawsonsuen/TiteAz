@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using NEvilES.Pipeline;
 using Newtonsoft.Json;
 
@@ -22,7 +24,8 @@ namespace TiteAz.ReadModel
 
             using (var cmd = _db.CreateCommand())
             {
-                cmd.CommandText = "select id, stream_id, type, last_update, body from read_model";
+                cmd.CommandText = "select id, stream_id, type, last_update, body from read_model where id=@id";
+                CreateParam(cmd, "id", DbType.Guid, id);
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (reader.Read())
@@ -103,6 +106,25 @@ namespace TiteAz.ReadModel
 
         }
 
+        public IEnumerable<T> Query<T>(Func<T, bool> p)
+        {
+            using (var cmd = _db.CreateCommand())
+            {
+                cmd.CommandText = "select id, stream_id, type, last_update, body from read_model where type=@type";
+                CreateParam(cmd, "type", DbType.String, typeof(T).AssemblyQualifiedName);
+                cmd.Transaction = _trans;
+                using (var reader = cmd.ExecuteReader())
+                {
+                    var results = new List<T>();
+                    while (reader.Read())
+                    {
+                        results.Add(JsonConvert.DeserializeObject<T>(reader.GetString(4)));
+                    }
+                    return results.Where(p);
+                }
+            }
+        }
+
         private static IDbDataParameter CreateParam(IDbCommand cmd, string name, DbType type, object value = null)
         {
             return CreateParam(cmd, name, type, null, value);
@@ -122,6 +144,4 @@ namespace TiteAz.ReadModel
             return param;
         }
     }
-
-
 }
