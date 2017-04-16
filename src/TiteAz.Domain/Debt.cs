@@ -5,7 +5,6 @@ namespace TiteAz.Domain
 {
     public abstract class Debt
     {
-
         public abstract class NewDebt
         {
             protected NewDebt() { }

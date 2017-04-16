@@ -63,7 +63,7 @@ namespace TiteAz.Api
             builder.Populate(services);
 
             var container = builder.Build();
-            container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
+            container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(Domain.User));
 
             // Create the IServiceProvider based on the container.
             return new AutofacServiceProvider(container);

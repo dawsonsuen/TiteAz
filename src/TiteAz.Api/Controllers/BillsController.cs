@@ -22,24 +22,31 @@ namespace TiteAz.Api.Controllers
         }
 
 
-        [HttpPostAttribute("[Action]")]
+        [HttpPostAttribute("bill")]
         public Guid Bill([FromBody] BillInputModel input)
         {
-            var created = new Domain.Bill.Created()
-            {
-                StreamId = CombGuid.NewGuid(),
-                Name = input.Name,
-                Description = input.Description,
-                Amount = input.Total
-            };
+            var created = new Domain.Bill.Create(CombGuid.NewGuid(), input.Name, input.Description, input.Total);
 
             _commandProcessor.Process(created);
 
-
-
-
-
             return created.StreamId;
         }
+
+
+        [HttpPost("bill/comment")]
+        public Guid AddComment([FromQueryAttribute] Guid BillId, [FromBody] CommentInputModel input)
+        {
+
+            var commentAdded = new Domain.Bill.AddComment(BillId, CombGuid.NewGuid(), input.Comment);
+
+            _commandProcessor.Process(commentAdded);
+
+            return commentAdded.CommentId;
+        }
+    }
+
+    public class CommentInputModel
+    {
+        public string Comment { get; set; }
     }
 }
