@@ -19,7 +19,8 @@ const appState: StateModel = {
     },
     login: { 
         username: "",
-        password: ""
+        password: "",
+        loggedInUser: null
     }
 };
 

@@ -51,7 +51,7 @@ namespace TiteAz.Api
                 return new CommandContext.User(uid);
             }).Named<CommandContext.IUser>("user");
 
-            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("pgsql"), DatabaseType.Postgres));
+            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("localdb"), DatabaseType.SqlServer));
             builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
             services.AddScoped<IWriteReadModel, SqlReadModel>();
