@@ -15,6 +15,7 @@ namespace TiteAz.Api
             var host = new WebHostBuilder()
                 .UseUrls("http://localhost:5001")
                 .UseKestrel()
+                .UseEnvironment(EnvironmentName.Development)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading.Tasks;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +11,6 @@ using NEvilES.Pipeline;
 using Newtonsoft.Json.Serialization;
 using TiteAz.Common;
 using Autofac.Extensions.DependencyInjection;
-using TiteAz.Domain;
 using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using TiteAz.ReadModel;
@@ -43,29 +40,22 @@ namespace TiteAz.Api
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 
-            services.AddScoped<SqlConnection>(x =>
-            {
-                var sqlConn = new SqlConnection(Configuration.GetConnectionString("TiteAz"));
-                sqlConn.Open();
-                return sqlConn;
-            });
-
-            services.AddScoped<IWriteReadModel, SqlReadModel>();
-            services.AddScoped<IReadFromReadModel, SqlReadModel>();
-
             var builder = new ContainerBuilder();
 
             builder.Register(c =>
             {
                 var a = c.Resolve<IHttpContextAccessor>();
-                var h = a.HttpContext.Request.Headers.FirstOrDefault(x=>x.Key == "UserId");
+                var h = a.HttpContext.Request.Headers.FirstOrDefault(x => x.Key == "X-User-Id");
                 var uid = Guid.Parse(h.Value.ToString());
 
                 return new CommandContext.User(uid);
             }).Named<CommandContext.IUser>("user");
 
-           // builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("TiteAz1")));
+            builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString("pgsql"), DatabaseType.Postgres));
             builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
+
+            services.AddScoped<IWriteReadModel, SqlReadModel>();
+            services.AddScoped<IReadFromReadModel, SqlReadModel>();
             builder.Populate(services);
 
 
@@ -84,8 +74,8 @@ namespace TiteAz.Api
                 x.AllowAnyOrigin();
                 x.AllowAnyHeader();
             });
-            app.UseMvc();
 
+            app.UseMvc();
         }
     }
 }
