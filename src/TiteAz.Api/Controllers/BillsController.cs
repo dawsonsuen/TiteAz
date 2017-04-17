@@ -22,12 +22,7 @@ namespace TiteAz.Api.Controllers
             _commandProcessor = commandProccessor;
         }
 
-        // [HttpGet("")]
-        // public IEnumerable<ReadModel.Bill> GetBills()
-        // {
-
-        // }
-
+        public IEnumerable<ReadModel.Bill> Index() => _reader.Query<ReadModel.Bill>(x => true);
 
         [HttpPost("bill")]
         public Guid Bill([FromBody] BillInputModel input)

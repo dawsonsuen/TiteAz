@@ -41,20 +41,40 @@ namespace TiteAz.Domain
 
         public class Accept : ICommand
         {
+            public Accept() { }
+            public Accept(Guid streamId)
+            {
+                StreamId = streamId;
+            }
             public Guid StreamId { get; set; }
         }
+
         public class Accepted : Accept, IEvent
         {
+            public Accepted() { }
+            public Accepted(Guid streamId) : base(streamId)
+            {
+            }
         }
 
         public class Dispute : ICommand
         {
+            public Dispute() { }
+            public Dispute(Guid streamId, string reason)
+            {
+                StreamId = streamId;
+                Reason = reason;
+            }
             public Guid StreamId { get; set; }
             public string Reason { get; set; }
         }
+
         public class Disputed : Dispute, IEvent
         {
-
+            public Disputed() { }
+            public Disputed(Guid streamId, string reason) : base(streamId, reason)
+            {
+            }
         }
 
         public class Aggregate : AggregateBase,

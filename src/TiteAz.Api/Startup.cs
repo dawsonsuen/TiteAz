@@ -51,7 +51,7 @@ namespace TiteAz.Api
                 var uid = Guid.Parse(h.Value.ToString());
 
                 return new CommandContext.User(uid);
-            }).Named<CommandContext.IUser>("user");
+            }).As<CommandContext.IUser>().Named<CommandContext.IUser>("user");
 
 
             builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());

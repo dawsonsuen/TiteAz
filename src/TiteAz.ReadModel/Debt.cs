@@ -16,13 +16,16 @@ namespace TiteAz.ReadModel
 
 
         public class Projector :
-            IProject<Domain.Debt.Created>
+            IProject<Domain.Debt.Created>,
+            IProject<Domain.Debt.Accepted>
         {
             private readonly IWriteReadModel _writer;
+            private readonly IReadFromReadModel _reader;
 
-            public Projector(IWriteReadModel writer)
+            public Projector(IReadFromReadModel reader, IWriteReadModel writer)
             {
                 _writer = writer;
+                _reader = reader;
             }
             public void Project(Domain.Debt.Created message, ProjectorData data)
             {
@@ -36,6 +39,15 @@ namespace TiteAz.ReadModel
                     Amount = message.Amount,
                     Status = "Created"
                 });
+            }
+
+            public void Project(Domain.Debt.Accepted message, ProjectorData data)
+            {
+                var debt = _reader.Get<Debt>(message.StreamId);
+
+                debt.Status = DebtStatus.Accepted.ToString();
+
+                _writer.Update(debt);
             }
         }
     }

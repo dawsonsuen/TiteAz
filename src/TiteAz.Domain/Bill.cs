@@ -7,7 +7,6 @@ namespace TiteAz.Domain
 {
     public abstract class Bill
     {
-
         public class Create : ICommand
         {
             public Create() { }
@@ -134,7 +133,7 @@ namespace TiteAz.Domain
 
             public void Apply(Created e)
             {
-
+                Comments = new List<Comment>();
             }
             public void Apply(CommentAdded e)
             {
@@ -166,7 +165,7 @@ namespace TiteAz.Domain
             }
 
             /* ----------------------------------------------------- */
-            private List<Comment> Comments { get; set; } = new List<Comment>();
+            private List<Comment> Comments;
 
         }
     }

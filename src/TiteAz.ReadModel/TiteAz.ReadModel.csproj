@@ -4,7 +4,6 @@
     <TargetFramework>netstandard1.5</TargetFramework>
   </PropertyGroup>
    <ItemGroup>
-    <PackageReference Include="NEvilES" Version="0.1.0-alpha72" />
     <ProjectReference Include="..\TiteAz.Common\TiteAz.Common.csproj" />
     <ProjectReference Include="..\TiteAz.Domain\TiteAz.Domain.csproj" />
   </ItemGroup>

@@ -12,6 +12,7 @@ using System.Data;
 using NEvilES.DataStore;
 using Npgsql;
 using System.Data.SqlClient;
+using System.Collections.Generic;
 
 namespace TiteAz.SeedData
 {
@@ -34,10 +35,10 @@ namespace TiteAz.SeedData
             builder.RegisterType<ReadModel.SqlReadModel>().AsImplementedInterfaces();
             builder.RegisterInstance<IEventTypeLookupStrategy>(new EventTypeLookupStrategy());
             builder.RegisterModule(new EventStoreDatabaseModule(Configuration.GetConnectionString(connStrName), databaseType));
-            builder.RegisterModule(new EventProcessorModule(typeof(User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
+            builder.RegisterModule(new EventProcessorModule(typeof(Domain.User).GetTypeInfo().Assembly, typeof(ReadModel.User).GetTypeInfo().Assembly));
 
             var container = builder.Build();
-            container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(User));
+            container.Resolve<IEventTypeLookupStrategy>().ScanAssemblyOfType(typeof(Domain.User));
 
             HandleDatabaseDropCreate(databaseType, dbType, connStrName);
 
@@ -49,9 +50,9 @@ namespace TiteAz.SeedData
             }
             var reader = (ReadModel.SqlReadModel)container.Resolve<IReadFromReadModel>();
 
-            // var x = reader.Get<ReadModel.User>(Guid.Empty);
+            //var x = reader.Get<ReadModel.User>(Guid.Empty);
 
-           //Console.WriteLine("Read Model Document Count {0}", reader.Count());
+            //Console.WriteLine("Read Model Document Count {0}", reader.Count());
             Console.WriteLine("Done - Hit any key!");
             Console.ReadKey();
         }
@@ -59,6 +60,9 @@ namespace TiteAz.SeedData
         private static void SeedData(IContainer container)
         {
             var id = CombGuid.NewGuid();
+            var craigsId = CombGuid.NewGuid();
+            var elijahsId = CombGuid.NewGuid();
+
             using (var scope = container.BeginLifetimeScope())
             {
                 scope.Resolve<PipelineTransaction>();
@@ -66,25 +70,51 @@ namespace TiteAz.SeedData
 
                 var craig = new User.NewUser
                 {
-                    StreamId = CombGuid.NewGuid(),
+                    StreamId = craigsId,
                     Details = new User.Details("craig@test.com", "xxx", "Craig", "Gardiner")
                 };
                 processor.Process(craig);
 
                 var elijah = new User.NewUser
                 {
-                    StreamId = CombGuid.NewGuid(),
+                    StreamId = elijahsId,
                     Details = new User.Details("elijah@test.com", "xxx", "Elijah", "Bate")
                 };
                 processor.Process(elijah);
 
-                var ourBill = new Bill.Created { StreamId = id, Description = "Sunday arvo fun ;)", Amount = 20.35m };
-                processor.Process(ourBill);
-                var youOweMe = new Debt.YouOweMe(CombGuid.NewGuid(), craig.StreamId, elijah.StreamId, ourBill.StreamId,
-                    10.1725m);
+            }
 
+            //Events as craig as the context user
+            var debtId = CombGuid.NewGuid();
+            using (var scope = container.BeginLifetimeScope(x =>
+                {
+                    x.RegisterInstance(new CommandContext.User(craigsId)).Named<CommandContext.IUser>("user");
+                })
+            )
+            {
+                scope.Resolve<PipelineTransaction>();
+                var processor = scope.Resolve<ICommandProcessor>();
+                var ourBill = new Bill.Create(id, "voodoo magic bitch", "Sunday arvo fun ;)", 20.35m);
+
+                processor.Process(ourBill);
+                var youOweMe = new Debt.YouOweMe(debtId, craigsId, elijahsId, ourBill.StreamId, 0.1725m);
                 processor.Process(youOweMe);
-                processor.Process(new Debt.Accept { StreamId = youOweMe.StreamId });
+            }
+
+            //Events as elijah as the context user
+            using (var scope = container.BeginLifetimeScope(x =>
+            {
+                x.RegisterInstance(new CommandContext.User(elijahsId)).Named<CommandContext.IUser>("user");
+            }))
+            {
+                scope.Resolve<PipelineTransaction>();
+                var processor = scope.Resolve<ICommandProcessor>();
+
+                //var elijahComment = new Bill.AddComment(id, CombGuid.NewGuid(), "wooohoo thinkgs and stuuff");
+                //processor.Process(elijahComment);
+                //processor.Process(new Bill.EditComment(id, elijahComment.CommentId, "wooohoo things and stuff"));
+                processor.Process(new Debt.Accept { StreamId = debtId });
+
             }
         }
 
@@ -195,6 +225,11 @@ namespace TiteAz.SeedData
         public int Count()
         {
             return data.Count;
+        }
+
+        public IEnumerable<T> Query<T>(Func<T, bool> p)
+        {
+            throw new NotImplementedException();
         }
     }
 
